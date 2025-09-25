@@ -1,0 +1,139 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/loozhengyuan/bulk/blob/main/schema/bulk-v0.json",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "Version of the configuration schema.",
+            "type": "integer"
+        },
+        "id": {
+            "description": "Unique identifier of the schema.",
+            "type": "string"
+        },
+        "on": {
+            "description": "Repositories targeted for the bulk changes.",
+            "type": "object",
+            "properties": {
+                "repositories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^[^/]+/[^/]+$"
+                    }
+                }
+            },
+            "required": [
+                "repositories"
+            ],
+            "additionalProperties": false
+        },
+        "steps": {
+            "description": "List of steps to run on the target repository.",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "script": {
+                                "description": "Details the shell script to be executed.",
+                                "type": "object",
+                                "properties": {
+                                    "run": {
+                                        "description": "Shell script to execute on the targeted repository.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "run"
+                                ],
+                                "additionalProperties": false
+                            }
+                        },
+                        "required": [
+                            "script"
+                        ],
+                        "additionalProperties": false
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "editor": {
+                                "description": "Details the editing steps to be executed.",
+                                "type": "object",
+                                "properties": {
+                                    "target": {
+                                        "description": "List of file paths to operate on. Accepts Glob expressions.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "replacements": {
+                                        "description": "List of replacement operations to run on targeted files.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "search": {
+                                                    "description": "Search term in regular expression.",
+                                                    "type": "string"
+                                                },
+                                                "replace": {
+                                                    "description": "Replacement text in regular expression.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "search",
+                                                "replace"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "target",
+                                    "replacements"
+                                ],
+                                "additionalProperties": false
+                            }
+                        },
+                        "required": [
+                            "editor"
+                        ],
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        },
+        "commit": {
+            "description": "Details used to create the Git commit and pull request.",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "description": "Title of the Git commit.",
+                    "type": "string"
+                },
+                "body": {
+                    "description": "Body of the Git commit.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "title",
+                "body"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "version",
+        "id",
+        "on",
+        "steps",
+        "commit"
+    ],
+    "additionalProperties": false
+}

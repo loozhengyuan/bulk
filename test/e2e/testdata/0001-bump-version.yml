@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=./../../../schema/bulk-v0.json
+version: 0
+id: fb3e83f89b0b310ec3defc3deef5abbf
+on:
+  repositories:
+    - loozhengyuan/test-bulk
+steps:
+  - script:
+      run: |
+        date -u > TIMESTAMP.md
+  - editor:
+      target:
+        - TIMESTAMP.md
+      replacements:
+        - search: UTC
+          replace: Z
+commit:
+  title: |
+    chore: update timestamp file
+  body: |
+    This commit updates the timestamp file.

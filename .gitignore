@@ -1,2 +1,5 @@
 # Environment files
 *.env
+
+# Go coverage files
+coverage.out
