@@ -1,0 +1,74 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+defaults:
+  run:
+    # NOTE: Default option does not include `-o pipefail` as documented
+    # unless explicitly specifying the `bash` shell.
+    # https://github.com/actions/runner/issues/353
+    shell: bash
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # NOTE: Required so injected GITHUB_TOKEN can take effect
+          # https://github.com/orgs/community/discussions/25240#discussioncomment-3247038
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: go.mod
+
+      # FIXME: Where is test cache stored? Why are reruns cached?
+      - name: Clean test cache
+        run: |
+          go clean -testcache
+
+      - name: Lint code
+        run: |
+          make lint
+
+      - name: Validate code
+        run: |
+          make check
+
+      - name: Run unit tests
+        run: |
+          make test
+
+      # NOTE: The commit email address should be the canonical no-reply email address
+      # used by the `github-actions[bot]` bot user.
+      # https://api.github.com/users/github-actions%5Bbot%5D
+      # https://github.community/t/github-actions-bot-email-address/17204/6
+      - name: Set up Git author
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Inject GitHub Token
+        env:
+          GH_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
+        run: |
+          git config --global url."https://loozhengyuan:${GH_TOKEN}@github.com/".insteadOf 'https://github.com/'
+          git config --global url."https://loozhengyuan:${GH_TOKEN}@github.com/".insteadOf 'git@github.com:'
+
+      - name: Run integration/e2e tests
+        env:
+          # NOTE: Required for GitHub CLI to create PRs
+          GH_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
+        run: |
+          make test-all

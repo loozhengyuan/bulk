@@ -1,5 +1,7 @@
 # `bulk`
 
+[![ci](https://github.com/loozhengyuan/bulk/actions/workflows/ci.yml/badge.svg)](https://github.com/loozhengyuan/bulk/actions/workflows/ci.yml)
+
 Apply bulk changes across repositories.
 
 ## Install
