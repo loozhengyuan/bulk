@@ -21,6 +21,14 @@ func (e *Engine) SetForce(force bool) {
 	e.force = force
 }
 
+func (e *Engine) SetKey(key string) {
+	// Override the plan ID if a non-empty key is provided
+	k := strings.TrimSpace(key)
+	if k != "" {
+		e.p.ID = k
+	}
+}
+
 func (e *Engine) Execute() error {
 	// TODO: Implement logic to match repos
 	for _, repo := range e.p.On.Repositories {

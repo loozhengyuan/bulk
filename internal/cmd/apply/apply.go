@@ -12,6 +12,7 @@ type options struct {
 	// TODO: Verbose or Debug mode? Or both?
 	// TODO: Do we need `--dry-run` and/or `--interactive` flags?
 	force bool
+	key   string
 }
 
 func New() *cobra.Command {
@@ -26,6 +27,7 @@ func New() *cobra.Command {
 				return fmt.Errorf("create engine: %w", err)
 			}
 			e.SetForce(opts.force)
+			e.SetKey(opts.key)
 			if err := e.Execute(); err != nil {
 				return fmt.Errorf("execute plan: %w", err)
 			}
@@ -33,5 +35,6 @@ func New() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "skips any interactive prompts")
+	cmd.Flags().StringVarP(&opts.key, "key", "k", "", "override the default id key")
 	return cmd
 }
