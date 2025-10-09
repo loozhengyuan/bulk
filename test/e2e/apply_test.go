@@ -25,7 +25,7 @@ func TestApply(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 
-	cmd := exec.Command("bulk", "apply", "--key", id, "--force", "./testdata/0001-bump-version.yml")
+	cmd := exec.Command("bulk", "apply", "--key", id, "--force", "./testdata/0001-update-timestamp.yml")
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
