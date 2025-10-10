@@ -55,9 +55,9 @@ func NewPlanFromJSON(r io.Reader) (*Plan, error) {
 }
 
 func NewPlanFromJSONFile(name string) (*Plan, error) {
-	f, err := os.Create(name)
+	f, err := os.Open(name)
 	if err != nil {
-		return nil, fmt.Errorf("create file: %w", err)
+		return nil, fmt.Errorf("open file: %w", err)
 	}
 	defer f.Close()
 	return NewPlanFromJSON(f)
@@ -72,9 +72,9 @@ func NewPlanFromYAML(r io.Reader) (*Plan, error) {
 }
 
 func NewPlanFromYAMLFile(name string) (*Plan, error) {
-	f, err := os.Create(name)
+	f, err := os.Open(name)
 	if err != nil {
-		return nil, fmt.Errorf("create file: %w", err)
+		return nil, fmt.Errorf("open file: %w", err)
 	}
 	defer f.Close()
 	return NewPlanFromYAML(f)
