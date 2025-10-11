@@ -1,8 +1,11 @@
 package engine
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -24,8 +27,12 @@ func (e *Engine) SetKey(key string) {
 }
 
 func (e *Engine) Execute() error {
-	// TODO: Implement logic to match repos
-	for _, repo := range e.p.On.Repositories {
+	repos, err := e.getRepositories()
+	if err != nil {
+		return fmt.Errorf("get repositories: %w", err)
+	}
+
+	for _, repo := range repos {
 		remote := fmt.Sprintf("git@github.com:%s.git", repo)
 		r, err := NewRepository(e.p.ID, remote, e.force)
 		if err != nil {
@@ -41,6 +48,76 @@ func (e *Engine) Execute() error {
 		}
 	}
 	return nil
+}
+
+func (e *Engine) getRepositories() ([]string, error) {
+	repoSet := make(map[string]struct{})
+	for _, r := range e.p.On.Repositories {
+		repoSet[r] = struct{}{}
+	}
+
+	if e.p.On.RepositoriesMatch.Search != "" {
+		matchedRepos, err := e.searchRepositories()
+		if err != nil {
+			return nil, fmt.Errorf("search repositories: %w", err)
+		}
+		for _, r := range matchedRepos {
+			repoSet[r] = struct{}{}
+		}
+	}
+
+	if len(repoSet) == 0 {
+		return nil, errors.New("no repos to process")
+	}
+
+	repos := make([]string, 0, len(repoSet))
+	for r := range repoSet {
+		repos = append(repos, r)
+	}
+	return repos, nil
+}
+
+func (e *Engine) searchRepositories() ([]string, error) {
+	m := e.p.On.RepositoriesMatch
+	args := []string{
+		"search", "code", m.Search,
+		"--json", "repository",
+		"--jq", ".[].repository.nameWithOwner",
+	}
+	if m.Extension != "" {
+		args = append(args, "--extension", m.Extension)
+	}
+	if m.Filename != "" {
+		args = append(args, "--filename", m.Filename)
+	}
+	if m.Language != "" {
+		args = append(args, "--language", m.Language)
+	}
+	for _, o := range m.Owners {
+		args = append(args, "--owner", o)
+	}
+	for _, r := range m.Repos {
+		args = append(args, "--repo", r)
+	}
+	if m.Size != "" {
+		args = append(args, "--size", m.Size)
+	}
+
+	var stdout, stderr bytes.Buffer
+	cmd := exec.Command("gh", args...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		if o := strings.TrimSpace(stdout.String()); o != "" {
+			fmt.Fprintln(os.Stderr, o)
+		}
+		if o := strings.TrimSpace(stderr.String()); o != "" {
+			fmt.Fprintln(os.Stderr, o)
+		}
+		return nil, fmt.Errorf("github search: %s", stderr.String())
+	}
+	return strings.Fields(stdout.String()), nil
 }
 
 func New(p *Plan) (*Engine, error) {
