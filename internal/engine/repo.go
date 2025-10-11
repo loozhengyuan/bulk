@@ -69,9 +69,11 @@ func (r *Repository) ApplyAndPushChanges(title, body string, steps ...Step) erro
 
 	// Preview diffs and prompt confirmation
 	// TODO: If supporting multi-commit, this will not work!
-	if _, err := r.Run("git", "--no-pager", "show", "--stat", "--patch", "--pretty=fuller", "HEAD"); err != nil {
+	diff, err := r.Run("git", "--no-pager", "show", "--stat", "--patch", "--pretty=fuller", "HEAD")
+	if err != nil {
 		return fmt.Errorf("preview commit: %w", err)
 	}
+	fmt.Println(diff)
 
 	if !r.auto {
 		confirm, err := promptConfirm("Would you like to proceed with the aforementioned changes?")
