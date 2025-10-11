@@ -33,6 +33,8 @@ func (e *Engine) Execute() error {
 	}
 
 	for _, repo := range repos {
+		fmt.Printf("Processing %s...", repo)
+
 		remote := fmt.Sprintf("git@github.com:%s.git", repo)
 		r, err := NewRepository(e.p.ID, remote, e.force)
 		if err != nil {
