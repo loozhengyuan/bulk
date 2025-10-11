@@ -44,6 +44,12 @@ func (e *Engine) Execute() error {
 }
 
 func New(p *Plan) (*Engine, error) {
+	c := TemplateContext{
+		Plan: *p,
+	}
+	if err := p.Inject(c); err != nil {
+		return nil, fmt.Errorf("inject tmpl: %w", err)
+	}
 	return &Engine{p: p}, nil
 }
 

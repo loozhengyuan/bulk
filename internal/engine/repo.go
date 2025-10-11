@@ -37,7 +37,6 @@ func (r *Repository) ApplyAndPushChanges(title, body string, steps ...Step) erro
 	}
 
 	// Apply changes
-	// TODO: Implement template vars?
 	for _, step := range steps {
 		// TODO: Properly validate each step first to ensure
 		// no conflicting properties?

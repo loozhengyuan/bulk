@@ -46,6 +46,24 @@ type Commit struct {
 	Body  string `json:"body"`
 }
 
+func (p *Plan) Inject(data TemplateContext) error {
+	var err error
+	if p.Commit.Title, err = data.RenderString(p.Commit.Title); err != nil {
+		return fmt.Errorf("inject commit.title: %w", err)
+	}
+	if p.Commit.Body, err = data.RenderString(p.Commit.Body); err != nil {
+		return fmt.Errorf("inject commit.body: %w", err)
+	}
+	if p.Steps != nil {
+		for i := range p.Steps {
+			if p.Steps[i].Script.Run, err = data.RenderString(p.Steps[i].Script.Run); err != nil {
+				return fmt.Errorf("inject steps.%d.script.run: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
+
 func NewPlanFromJSON(r io.Reader) (*Plan, error) {
 	var p Plan
 	if err := json.NewDecoder(r).Decode(&p); err != nil {
