@@ -21,5 +21,5 @@ func execScript(dir, script string) error {
 	}
 
 	// TODO: Support other shells?
-	return execCommand(dir, "bash", "-euo", "pipefail", f.Name())
+	return dirExec(dir, "bash", "-euo", "pipefail", f.Name())
 }

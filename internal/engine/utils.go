@@ -2,16 +2,16 @@ package engine
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-func execCommand(dir, cmd string, args ...string) error {
-	// TODO: Implement CommandContext?
+func dirExecContext(ctx context.Context, dir, cmd string, args ...string) error {
 	// TODO: Should we not pipe stdout/err?
-	c := exec.Command(cmd, args...)
+	c := exec.CommandContext(ctx, cmd, args...)
 	c.Dir = dir
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
@@ -19,6 +19,10 @@ func execCommand(dir, cmd string, args ...string) error {
 		return fmt.Errorf("run command: %w", err)
 	}
 	return nil
+}
+
+func dirExec(dir, cmd string, args ...string) error {
+	return dirExecContext(context.Background(), dir, cmd, args...)
 }
 
 func promptConfirm(prompt string) (bool, error) {
