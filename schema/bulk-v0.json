@@ -21,12 +21,43 @@
                         "type": "string",
                         "pattern": "^[^/]+/[^/]+$"
                     }
+                },
+                "repositoriesMatch": {
+                    "type": "object",
+                    "properties": {
+                        "search": {
+                            "type": "string"
+                        },
+                        "extension": {
+                            "type": "string"
+                        },
+                        "filename": {
+                            "type": "string"
+                        },
+                        "language": {
+                            "type": "string"
+                        },
+                        "owners": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "repos": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "size": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "search"
+                    ]
                 }
-            },
-            "required": [
-                "repositories"
-            ],
-            "additionalProperties": false
+            }
         },
         "steps": {
             "description": "List of steps to run on the target repository.",

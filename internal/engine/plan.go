@@ -18,7 +18,18 @@ type Plan struct {
 }
 
 type On struct {
-	Repositories []string `json:"repositories"`
+	Repositories      []string          `json:"repositories"`
+	RepositoriesMatch RepositoriesMatch `json:"repositoriesMatch"`
+}
+
+type RepositoriesMatch struct {
+	Search    string   `json:"search"`
+	Extension string   `json:"extension"`
+	Filename  string   `json:"filename"`
+	Language  string   `json:"language"`
+	Owners    []string `json:"owners"`
+	Repos     []string `json:"repos"`
+	Size      string   `json:"size"`
 }
 
 // TODO: Implement sum types?
