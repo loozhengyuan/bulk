@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -37,25 +36,14 @@ func (r *Repository) ApplyAndPushChanges(title, body string, steps ...Step) erro
 	}
 
 	// Apply changes
-	for _, step := range steps {
-		// TODO: Properly validate each step first to ensure
-		// no conflicting properties?
-		switch {
-		case step.Script.Run != "":
-			if err := execScript(r.dir, step.Script.Run); err != nil {
-				return fmt.Errorf("exec script: %w", err)
-			}
-		case len(step.Editor.Target) > 0 && len(step.Editor.Replacements) > 0:
-			// NOTE: Target needs to be relative of working dir
-			p := make([]string, 0, len(step.Editor.Target))
-			for _, t := range step.Editor.Target {
-				p = append(p, filepath.Join(r.dir, t))
-			}
-			if err := searchReplace(p, step.Editor.Replacements); err != nil {
-				return fmt.Errorf("search and replace: %w", err)
-			}
-		default:
-			return fmt.Errorf("invalid step definition: %#v", step)
+	for i, step := range steps {
+		op, err := step.GetOperator()
+		if err != nil {
+			return fmt.Errorf("get operator for step %d: %w", i, err)
+		}
+		// NOTE: Target needs to be relative of working dir
+		if err := op.Apply(OperatorContext{Dir: r.dir}); err != nil {
+			return fmt.Errorf("apply operator for step %d: %w", i, err)
 		}
 	}
 

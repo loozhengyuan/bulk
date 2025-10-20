@@ -21,19 +21,23 @@ type On struct {
 	Repositories []string `json:"repositories"`
 }
 
-// TODO: Implement sum types?
 type Step struct {
-	Script StepScript `json:"script"`
-	Editor StepEditor `json:"editor"`
+	ExecScript    *OperatorExecScript    `json:"script,omitempty"`
+	SearchReplace *OperatorSearchReplace `json:"editor,omitempty"`
 }
 
-type StepScript struct {
-	Run string `json:"run"`
-}
-
-type StepEditor struct {
-	Target       []string                `json:"target"`
-	Replacements []StepEditorReplacement `json:"replacements"`
+func (s *Step) GetOperator() (Operator, error) {
+	// Ensure that only one operator is defined per step
+	if s.ExecScript != nil && s.SearchReplace != nil {
+		return nil, fmt.Errorf("multiple operators defined in a single step")
+	}
+	if s.ExecScript != nil {
+		return s.ExecScript, nil
+	}
+	if s.SearchReplace != nil {
+		return s.SearchReplace, nil
+	}
+	return nil, fmt.Errorf("unknown operator")
 }
 
 type StepEditorReplacement struct {
@@ -55,9 +59,11 @@ func (p *Plan) Inject(data TemplateContext) error {
 		return fmt.Errorf("inject commit.body: %w", err)
 	}
 	if p.Steps != nil {
-		for i := range p.Steps {
-			if p.Steps[i].Script.Run, err = data.RenderString(p.Steps[i].Script.Run); err != nil {
-				return fmt.Errorf("inject steps.%d.script.run: %w", i, err)
+		for i, step := range p.Steps {
+			if step.ExecScript != nil {
+				if p.Steps[i].ExecScript.Run, err = data.RenderString(step.ExecScript.Run); err != nil {
+					return fmt.Errorf("inject steps.%d.script.run: %w", i, err)
+				}
 			}
 		}
 	}
