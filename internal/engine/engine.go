@@ -129,6 +129,15 @@ func New(p *Plan) (*Engine, error) {
 	if err := p.Inject(c); err != nil {
 		return nil, fmt.Errorf("inject tmpl: %w", err)
 	}
+	for i, step := range p.Steps {
+		op, err := step.GetOperator()
+		if err != nil {
+			return nil, fmt.Errorf("get operator for step %d: %w", i, err)
+		}
+		if err := op.Validate(); err != nil {
+			return nil, fmt.Errorf("validate step %d: %w", i, err)
+		}
+	}
 	return &Engine{p: p}, nil
 }
 

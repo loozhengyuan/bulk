@@ -5,7 +5,20 @@ import (
 	"os"
 )
 
-func execScript(dir, script string) error {
+var _ Operator = (*OperatorExecScript)(nil)
+
+type OperatorExecScript struct {
+	Run string `json:"run"`
+}
+
+func (op *OperatorExecScript) Validate() error {
+	if op.Run == "" {
+		return fmt.Errorf("run is not specified")
+	}
+	return nil
+}
+
+func (op *OperatorExecScript) Apply(ctx OperatorContext) error {
 	// TODO: Support running in container?
 	f, err := os.CreateTemp("", "script-*.sh")
 	if err != nil {
@@ -13,7 +26,7 @@ func execScript(dir, script string) error {
 	}
 	defer os.Remove(f.Name())
 
-	if _, err := f.WriteString(script); err != nil {
+	if _, err := f.WriteString(op.Run); err != nil {
 		return fmt.Errorf("write script to file: %w", err)
 	}
 	if err := f.Close(); err != nil {
@@ -21,5 +34,5 @@ func execScript(dir, script string) error {
 	}
 
 	// TODO: Support other shells?
-	return dirExec(dir, "bash", "-euo", "pipefail", f.Name())
+	return dirExec(ctx.Dir, "bash", "-euo", "pipefail", f.Name())
 }
