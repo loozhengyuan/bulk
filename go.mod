@@ -3,7 +3,7 @@ module github.com/loozhengyuan/bulk
 go 1.25.0
 
 require (
-	github.com/goccy/go-yaml v1.19.1
+	github.com/goccy/go-yaml v1.19.2
 	github.com/loozhengyuan/grench v0.7.0
 	github.com/spf13/cobra v1.10.2
 )
